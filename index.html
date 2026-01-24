@@ -1,66 +1,13 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Dopamine Controller</title>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>web-app</title>
   </head>
   <body>
-    <h1>Dopamine Controller</h1>
-
-    <button onclick="openWithFriction('https://www.tiktok.com/')">TikTok</button>
-    <button onclick="openWithFriction('https://twitter.com/')">Twitter</button>
-    <button onclick="openWithFriction('https://www.facebook.com/')">Facebook</button>
-
-    <div id="modal" style="display:none; position:fixed; inset:0; background:#0008; padding:40px;">
-      <div style="background:white; padding:20px; max-width:320px;">
-        <h2>Wait…</h2>
-        <p id="countdownText"></p>
-        <button id="cancelBtn">Cancel</button>
-        <button id="goBtn" disabled>Continue</button>
-      </div>
-    </div>
-
-    <script>
-      let targetUrl = "";
-      let timer = null;
-      let secondsLeft = 0;
-
-      function openWithFriction(url) {
-        targetUrl = url;
-        secondsLeft = 10;
-
-        const modal = document.getElementById("modal");
-        const countdownText = document.getElementById("countdownText");
-        const cancelBtn = document.getElementById("cancelBtn");
-        const goBtn = document.getElementById("goBtn");
-
-        modal.style.display = "block";
-        goBtn.disabled = true;
-
-        countdownText.textContent = `You can continue in ${secondsLeft}s`;
-
-        cancelBtn.onclick = () => {
-          clearInterval(timer);
-          modal.style.display = "none";
-        };
-
-        goBtn.onclick = () => {
-          window.location.href = targetUrl; // sends you to site, which may prompt iOS to open the app
-        };
-
-        clearInterval(timer);
-        timer = setInterval(() => {
-          secondsLeft -= 1;
-          if (secondsLeft <= 0) {
-            clearInterval(timer);
-            countdownText.textContent = "You can continue now.";
-            goBtn.disabled = false;
-          } else {
-            countdownText.textContent = `You can continue in ${secondsLeft}s`;
-          }
-        }, 1000);
-      }
-    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
