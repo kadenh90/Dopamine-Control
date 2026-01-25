@@ -24,7 +24,7 @@ function DrawerNav() {
           top: 0,
           zIndex: 50,
           background: "white",
-          borderBottom: "1px solid #eee",
+          borderBottom: "3px solid #cf7105",
           padding: 12,
           display: "flex",
           alignItems: "center",
@@ -39,11 +39,12 @@ function DrawerNav() {
             width: 44,
             height: 44,
             borderRadius: 12,
-            border: "1px solid #ddd",
+            border: "2px solid #000000",
             background: "white",
             cursor: "pointer",
             display: "grid",
             placeItems: "center",
+            background: "#ff8800",
           }}
         >
           {/* hamburger icon */}
