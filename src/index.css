@@ -55,66 +55,6 @@ body::after {
   z-index: 0;              
   transform: translate3d(0,0,0);
 }
-
-/* blobs */
-body::before {
-  background:
-    /* top-left */
-    radial-gradient(70vmax 55vmax at 12% 18%, rgb(252, 235, 1) 0%, rgba(140, 90, 255, 0.00) 62%),
-
-    /* top-right */
-    radial-gradient(75vmax 55vmax at 88% 22%, rgba(0, 170, 255, 0.42) 0%, rgba(0, 170, 255, 0.00) 62%),
-
-    /* bottom-left */
-    radial-gradient(75vmax 60vmax at 16% 88%, rgb(255, 255, 255) 0%, rgba(180, 60, 255, 0.00) 62%),
-
-    /* bottom-right */
-    radial-gradient(75vmax 60vmax at 86% 82%, rgb(255, 209, 2) 0%, rgba(40, 180, 255, 0.00) 62%),
-
-    /* center spread */
-    radial-gradient(95vmax 80vmax at 50% 55%, rgb(0, 0, 0) 0%, rgba(90, 120, 255, 0.00) 68%),
-
-    /* subtle orange accents, spread */
-    radial-gradient(55vmax 45vmax at 72% 45%, rgba(255, 136, 0, 0.596) 0%, rgba(255, 136, 0, 0.00) 60%),
-    radial-gradient(45vmax 36vmax at 30% 62%, rgba(255, 136, 0, 0.555) 0%, rgba(255, 136, 0, 0.00) 60%);
-
-  opacity: 0.95;
-  mix-blend-mode: normal;
-  filter: blur(28px) saturate(170%) contrast(125%);
-  animation: nebulaDrift 22s ease-in-out infinite alternate;
-}
-
-/* Stars + dust */
-body::after {
-  background:
-    /* stars */
-    radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.28) 50%, transparent 52%),
-    radial-gradient(1px 1px at 30% 70%, rgba(255,255,255,0.18) 50%, transparent 52%),
-    radial-gradient(1px 1px at 55% 35%, rgba(255,255,255,0.22) 50%, transparent 52%),
-    radial-gradient(1px 1px at 75% 60%, rgba(255,255,255,0.16) 50%, transparent 52%),
-    radial-gradient(1px 1px at 90% 25%, rgba(255,255,255,0.14) 50%, transparent 52%),
-    radial-gradient(1px 1px at 22% 45%, rgba(255,255,255,0.12) 50%, transparent 52%),
-    radial-gradient(1px 1px at 66% 18%, rgba(255,255,255,0.15) 50%, transparent 52%),
-
-    /* tiny dust specks */
-    radial-gradient(2px 2px at 15% 55%, rgba(255,255,255,0.06) 40%, transparent 42%),
-    radial-gradient(2px 2px at 65% 75%, rgba(255,255,255,0.05) 40%, transparent 42%);
-
-  background-size: 190px 190px, 190px 190px, 190px 190px, 190px 190px, 190px 190px, 190px 190px, 190px 190px, 260px 260px, 260px 260px;
-  opacity: 0.50;
-  animation: starsDrift 95s linear infinite;
-}
-
-@keyframes nebulaDrift {
-  0%   { transform: translate3d(-4%, -3%, 0) scale(1.06) rotate(0.8deg); }
-  100% { transform: translate3d( 4%,  3%, 0) scale(1.10) rotate(-0.8deg); }
-}
-
-@keyframes starsDrift {
-  from { transform: translate3d(0, 0, 0); }
-  to   { transform: translate3d(-260px, 260px, 0); }
-}
-
 @media (prefers-reduced-motion: reduce) {
   body::before,
   body::after { animation: none !important; }
@@ -178,7 +118,7 @@ a:hover { color: white; }
   width: 280px;
   z-index: 70;
   padding: 14px;
-  background: rgba(18, 24, 38, 0.92);
+  background: rgba(151, 104, 3, 0.92);
   backdrop-filter: blur(10px);
   border-right: 1px solid var(--border);
   box-shadow: var(--shadow);
@@ -194,13 +134,13 @@ a:hover { color: white; }
 }
 
 .drawer__title { font-weight: 900; }
-
+/* drawer x button*/
 .drawer__close {
   width: 40px;
   height: 40px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.06);
+  background: rgb(0, 0, 0);
   color: var(--text);
   cursor: pointer;
 }
@@ -215,11 +155,11 @@ a:hover { color: white; }
   padding: 12px 14px;
   border-radius: 14px;
   border: 1px solid var(--border);
-  background: rgba(255,255,255,0.06);
+  background: rgb(0, 0, 0);
 }
 .drawer__link:hover {
   border-color: rgba(255,255,255,0.22);
-  background: rgba(255,255,255,0.10);
+  background: rgba(194, 178, 163, 0.829);
 }
 
 .drawer__hint {
@@ -462,3 +402,102 @@ a:hover { color: white; }
 }
 
 .modalActions { display: flex; gap: 10px; }
+
+/* Full-screen dimmed background */
+.modalOverlay {
+  position: fixed;
+  inset: 0;              /* top:0; right:0; bottom:0; left:0 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* The popup card */
+.modalCard {
+  width: min(520px, 92vw);
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(20, 20, 20, 0.95);  /* adjust to match your theme */
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+/* Optional: make labels/fields look nicer */
+.modalField {
+  display: block;
+  margin-top: 12px;
+}
+
+.modalLabel {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.modalCard input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: inherit;
+  outline: none;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+/* ---------- Modal (overlay + centered card) ---------- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.modalCard {
+  width: min(520px, 92vw);
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modalField {
+  display: block;
+  margin-top: 12px;
+}
+
+.modalLabel {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.modalCard input,
+.modalCard select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  outline: none;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
