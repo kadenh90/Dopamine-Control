@@ -3,7 +3,13 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
 import App from "./App.jsx";
 import Stopwatch from "./Stopwatch.jsx";
-import "./index.css";
+import "./styles/base.css";
+import "./styles/nav.css";
+import "./styles/layout.css";
+import "./styles/components.css";
+import "./styles/modal.css";
+
+
 
 function DrawerNav() {
   const [open, setOpen] = useState(false);

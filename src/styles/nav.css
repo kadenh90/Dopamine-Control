@@ -1,0 +1,107 @@
+/* ---------- Top bar + drawer ---------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(10, 14, 22, 0.78);
+  backdrop-filter: blur(10px);
+  border-bottom: 3px solid var(--accent-2);
+}
+
+.topbar__title {
+  font-weight: 900;
+  letter-spacing: 0.2px;
+}
+
+.hamburger {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  border: 2px solid rgba(0,0,0,0.55);
+  background: var(--accent);
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 10px 22px rgba(0,0,0,0.25);
+}
+
+.hamburger span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #111;
+  border-radius: 10px;
+  margin: 2px 0;
+}
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 60;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 280px;
+  z-index: 70;
+  padding: 14px;
+  background: rgba(151, 104, 3, 0.92);
+  backdrop-filter: blur(10px);
+  border-right: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  transform: translateX(-110%);
+  transition: transform 200ms ease;
+}
+
+.drawer--open { transform: translateX(0); }
+
+.drawer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.drawer__title { font-weight: 900; }
+
+/* drawer x button */
+.drawer__close {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgb(0, 0, 0);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.drawer__links {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.drawer__link {
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: rgb(0, 0, 0);
+}
+
+.drawer__link:hover {
+  border-color: rgba(255,255,255,0.22);
+  background: rgba(194, 178, 163, 0.829);
+}
+
+.drawer__hint {
+  margin-top: 18px;
+  font-size: 12px;
+  color: var(--muted);
+}

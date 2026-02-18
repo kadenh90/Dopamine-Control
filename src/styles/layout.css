@@ -1,0 +1,42 @@
+/* ---------- Page container ---------- */
+.page {
+  padding: 22px 16px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.page__title {
+  margin: 10px 0 6px;
+  font-size: 30px;
+  line-height: 1.1;
+}
+
+.page__subtitle {
+  margin: 0 0 14px;
+  color: var(--muted);
+}
+
+/* ---------- Section + grids ---------- */
+.section { margin-top: 22px; }
+.section__title { margin: 0 0 10px; }
+
+.tileRow {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.tileRow--tight { gap: 14px; }
+
+.summaryGrid {
+  display: grid;
+  gap: 12px;
+}
+
+.btnRow {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}

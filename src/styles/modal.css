@@ -1,0 +1,48 @@
+/* ---------- Modal (overlay + centered card) ---------- */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.modalCard {
+  width: min(520px, 92vw);
+  border-radius: 16px;
+  padding: 16px;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+}
+
+.modalField {
+  display: block;
+  margin-top: 12px;
+}
+
+.modalLabel {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-bottom: 6px;
+}
+
+.modalCard input,
+.modalCard select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: inherit;
+  outline: none;
+}
+
+.modalActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
