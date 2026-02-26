@@ -1,20 +1,32 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { FaTiktok, FaTwitter, FaFacebook } from "react-icons/fa";
 
-function IconTile({ label, onClick, variant, children }) {
+function IconTile({ label, onClick, variant, children, locked, lockedText }) {
   return (
-    <button
-      onClick={onClick}
-      className={`tile tile--app tile--${variant}`}
-      aria-label={label}
-      title={label}
-      type="button"
-    >
-      <div className="tile__inner">
-        <div className="tile__icon">{children}</div>
-        <div className="tile__label">{label}</div>
-      </div>
-    </button>
+    <div className="tileWrap">
+      <button
+        onClick={onClick}
+        className={`tile tile--app tile--${variant} ${locked ? "tile--locked" : ""}`}
+        aria-label={label}
+        title={label}
+        type="button"
+        disabled={locked}
+      >
+        <div className="tile__inner">
+          <div className="tile__icon">{children}</div>
+          <div className="tile__label">{label}</div>
+
+          {locked && (
+            <div className="lockX" aria-hidden="true">
+              <span className="lockX__a" />
+              <span className="lockX__b" />
+            </div>
+          )}
+        </div>
+      </button>
+
+      {locked && <div className="lockTextBelow">{lockedText}</div>}
+    </div>
   );
 }
 
@@ -26,103 +38,175 @@ function todayKey() {
   return `${yyyy}-${mm}-${dd}`;
 }
 
-function opensStorageKey(appKey) {
-  return `opens:${todayKey()}:${appKey}`;
+/** -------- Lockout persistence (per app) -------- */
+function lockKey(appKey) {
+  return `lockUntil:${todayKey()}:${appKey}`;
 }
 
-function getOpensToday(appKey) {
+function getLockUntil(appKey) {
   try {
-    return Number(localStorage.getItem(opensStorageKey(appKey)) || "0");
+    return Number(localStorage.getItem(lockKey(appKey)) || "0");
   } catch {
     return 0;
   }
 }
 
-function incrementOpensToday(appKey) {
-  const next = getOpensToday(appKey) + 1;
+function setLockUntil(appKey, ts) {
   try {
-    localStorage.setItem(opensStorageKey(appKey), String(next));
+    localStorage.setItem(lockKey(appKey), String(ts));
   } catch {
     // ignore
   }
-  return next;
+}
+
+function formatMMSS(totalSeconds) {
+  const m = Math.floor(totalSeconds / 60);
+  const s = totalSeconds % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
 }
 
 function clamp(n, a, b) {
   return Math.max(a, Math.min(b, n));
 }
 
-function buildLogs(appLabel, attempt) {
-  const base = [
-    "boot: quarantine_kernel v1.0",
-    `target: ${appLabel.toLowerCase()}.app`,
-    "proc: impulse_detector.exe",
-    "scan: dopamine_signature...",
-    "scan: attention_hijack_vectors...",
-    "firewall: blocking autopilot...",
-    "verify: user_intent_checksum...",
-    "contain: reward_loop isolated",
-    "status: containment stable",
+/** -------- Math problem generator -------- */
+function randomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function makeMathProblem() {
+  // Two-digit multiply like 17*19
+  const a = randomInt(12, 29);
+  const b = randomInt(12, 29);
+  return {
+    prompt: `${a} × ${b} = ?`,
+    answer: a * b,
+  };
+}
+
+/** -------- Log lines -------- */
+function buildPressureLogs(secondsLeft) {
+  const lines = [
+    "boot: quarantine_kernel v2.4",
+    "status: distraction_gate ARMED",
+    "warning: dopamine request detected",
+    "policy: solve challenge or lockout",
+    "monitor: time is ticking…",
   ];
 
-  if (attempt >= 2) base.splice(4, 0, `alert: repeat attempt detected (${attempt})`);
-  if (attempt >= 3) base.splice(6, 0, "lock: hardened mode enabled");
+  if (secondsLeft <= 45) lines.push("hint: breathing optional, focus mandatory.");
+  if (secondsLeft <= 30) lines.push("ALERT: 30 seconds left.");
+  if (secondsLeft <= 20) lines.push("ALERT: time collapsing.");
+  if (secondsLeft <= 10) lines.push("ALERT: final 10 seconds.");
+  if (secondsLeft <= 5) lines.push("PANIC: last chance.");
 
-  return base;
+  return lines;
 }
 
 export default function App() {
+  // Overlay open state + target
   const [open, setOpen] = useState(false);
-
-  // “Target” info for the overlay
   const [targetUrl, setTargetUrl] = useState("");
   const [targetLabel, setTargetLabel] = useState("");
-  const [attemptNumber, setAttemptNumber] = useState(1);
+  const [targetKey, setTargetKey] = useState("");
 
-  // countdown + logs
-  const [secondsLeft, setSecondsLeft] = useState(10);
+  // Challenge state
+  const [secondsLeft, setSecondsLeft] = useState(60);
+  const [problem, setProblem] = useState(() => makeMathProblem());
+  const [userAnswer, setUserAnswer] = useState("");
+  const [errorText, setErrorText] = useState("");
+
+  // Logs
   const [logLines, setLogLines] = useState([]);
 
+  // Lockouts state (store timestamps)
+  const [lockouts, setLockouts] = useState(() => ({
+    tiktok: getLockUntil("tiktok"),
+    twitter: getLockUntil("twitter"),
+    facebook: getLockUntil("facebook"),
+  }));
+
+  // Tick for UI countdown under locked icons
+  const [now, setNow] = useState(Date.now());
+
   const timerRef = useRef(null);
+  const uiTickRef = useRef(null);
 
-  const logs = useMemo(() => {
-    return buildLogs(targetLabel || "app", attemptNumber);
-  }, [targetLabel, attemptNumber]);
+  useEffect(() => {
+    uiTickRef.current = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(uiTickRef.current);
+  }, []);
 
-  function openWithFriction(appKey, label, url) {
-    // track attempts per day (for escalation later)
-    const attempt = incrementOpensToday(appKey);
+  function isLocked(appKey) {
+    return now < (lockouts[appKey] || 0);
+  }
 
-    setTargetUrl(url);
+  function lockedText(appKey) {
+    const until = lockouts[appKey] || 0;
+    const diffMs = Math.max(0, until - now);
+    const diffSec = Math.ceil(diffMs / 1000);
+    return diffSec > 0 ? `Locked • ${formatMMSS(diffSec)}` : "";
+  }
+
+  function openWithChallenge(appKey, label, url) {
+    if (isLocked(appKey)) return;
+
+    setTargetKey(appKey);
     setTargetLabel(label);
-    setAttemptNumber(attempt);
+    setTargetUrl(url);
 
-    // escalation (simple)
-    const base = 10;
-    const extra = attempt === 1 ? 0 : attempt === 2 ? 5 : 10;
-    const secs = base + extra;
+    setSecondsLeft(60);
+    setProblem(makeMathProblem());
+    setUserAnswer("");
+    setErrorText("");
 
-    setSecondsLeft(secs);
-    setLogLines([logs[0] || "boot: quarantine_kernel v1.0"]);
+    setLogLines(buildPressureLogs(60));
     setOpen(true);
   }
 
-  function cancel() {
+  function closeOverlay() {
     if (timerRef.current) clearInterval(timerRef.current);
     timerRef.current = null;
     setOpen(false);
   }
 
-  function go() {
-    // keep your deep-link behavior
-    window.location.href = targetUrl;
+  function failAndLock() {
+    const lockUntil = Date.now() + 5 * 60 * 1000; // 5 minutes
+    setLockUntil(targetKey, lockUntil);
+    setLockouts((prev) => ({ ...prev, [targetKey]: lockUntil }));
+    closeOverlay();
+  }
+
+  // NEW: Back/close counts as failing (prevents cheating)
+  function backCountsAsFail() {
+    if (!open || !targetKey) {
+      closeOverlay();
+      return;
+    }
+    failAndLock();
+  }
+
+  function submitAnswer() {
+    if (secondsLeft <= 0) return;
+
+    const n = Number(userAnswer.trim());
+    if (!Number.isFinite(n)) {
+      setErrorText("Enter a number.");
+      return;
+    }
+
+    if (n === problem.answer) {
+      window.location.href = targetUrl;
+      return;
+    }
+
+    // unlimited attempts; only time-out causes lockout
+    setErrorText("Wrong. Try again.");
+    setUserAnswer("");
   }
 
   useEffect(() => {
     if (!open) return;
-
-    // reset logs
-    setLogLines([logs[0]]);
 
     if (timerRef.current) clearInterval(timerRef.current);
 
@@ -130,18 +214,21 @@ export default function App() {
       setSecondsLeft((s) => {
         const next = s - 1;
 
-        // drip logs each second based on elapsed
+        const newLogs = buildPressureLogs(next);
         setLogLines((prev) => {
-          const elapsed = Math.max(0, (secondsLeft - next)); // approx
-          const idx = clamp(elapsed, 0, logs.length - 1);
-          const desired = logs.slice(0, idx + 1);
-          if (prev.length === desired.length) return prev;
-          return desired;
+          if (
+            prev.length === newLogs.length &&
+            prev[prev.length - 1] === newLogs[newLogs.length - 1]
+          )
+            return prev;
+          return newLogs;
         });
 
         if (next <= 0) {
           clearInterval(timerRef.current);
           timerRef.current = null;
+          setErrorText("Time’s up. Locked out for 5 minutes.");
+          setTimeout(() => failAndLock(), 400);
           return 0;
         }
         return next;
@@ -153,30 +240,22 @@ export default function App() {
       timerRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, logs]);
+  }, [open]);
 
-  const canContinue = secondsLeft === 0;
-
-  // progress based on the starting number for this open
-  const startingSeconds = useMemo(() => {
-    // attempt 1: 10, attempt 2: 15, attempt 3+: 20 (must match openWithFriction calc)
-    const base = 10;
-    const extra = attemptNumber === 1 ? 0 : attemptNumber === 2 ? 5 : 10;
-    return base + extra;
-  }, [attemptNumber]);
-
-  const pct = clamp(((startingSeconds - secondsLeft) / startingSeconds) * 100, 0, 100);
+  const pct = clamp(((60 - secondsLeft) / 60) * 100, 0, 100);
 
   return (
     <div className="page">
       <h1 className="page__title">Dopamine Controller</h1>
-      <p className="page__subtitle">Tap an app → quarantine scan → then you can continue.</p>
+      <p className="page__subtitle">Tap an app → solve the challenge → continue.</p>
 
       <div className="tileRow">
         <IconTile
           label="TikTok"
           variant="tiktok"
-          onClick={() => openWithFriction("tiktok", "TikTok", "https://www.tiktok.com/")}
+          locked={isLocked("tiktok")}
+          lockedText={lockedText("tiktok")}
+          onClick={() => openWithChallenge("tiktok", "TikTok", "https://www.tiktok.com/")}
         >
           <FaTiktok />
         </IconTile>
@@ -184,7 +263,9 @@ export default function App() {
         <IconTile
           label="Twitter"
           variant="twitter"
-          onClick={() => openWithFriction("twitter", "Twitter", "https://twitter.com/")}
+          locked={isLocked("twitter")}
+          lockedText={lockedText("twitter")}
+          onClick={() => openWithChallenge("twitter", "Twitter", "https://twitter.com/")}
         >
           <FaTwitter />
         </IconTile>
@@ -192,7 +273,9 @@ export default function App() {
         <IconTile
           label="Facebook"
           variant="facebook"
-          onClick={() => openWithFriction("facebook", "Facebook", "https://www.facebook.com/")}
+          locked={isLocked("facebook")}
+          lockedText={lockedText("facebook")}
+          onClick={() => openWithChallenge("facebook", "Facebook", "https://www.facebook.com/")}
         >
           <FaFacebook />
         </IconTile>
@@ -200,19 +283,23 @@ export default function App() {
 
       {open && (
         <div className="qcOverlay" role="dialog" aria-modal="true">
-          <div className="qcGlass" onClick={cancel} />
+          <div className="qcGlass" onClick={backCountsAsFail} />
 
           <div className="qcPanel" onClick={(e) => e.stopPropagation()}>
             <div className="qcHeader">
               <div className="qcTitle">QUARANTINE MODE</div>
-              <button className="qcClose" onClick={cancel} type="button" aria-label="Close quarantine">
+              <button
+                className="qcClose"
+                onClick={backCountsAsFail}
+                type="button"
+                aria-label="Close quarantine"
+              >
                 ✕
               </button>
             </div>
 
             <div className="qcSub">
-              Target: <span className="qcAccent">{targetLabel}</span> • Attempt today:{" "}
-              <span className="qcAccent">{attemptNumber}</span>
+              Target: <span className="qcAccent">{targetLabel}</span>
             </div>
 
             <div className="qcProgressWrap">
@@ -220,7 +307,7 @@ export default function App() {
                 <div className="qcProgressFill" style={{ width: `${pct}%` }} />
               </div>
               <div className="qcProgressText">
-                {canContinue ? "UNLOCKED — proceed." : `Scanning… ${secondsLeft}s`}
+                {secondsLeft > 0 ? `TIME LEFT: ${secondsLeft}s` : "TIME EXPIRED"}
               </div>
             </div>
 
@@ -230,37 +317,60 @@ export default function App() {
                 <div className="qcLog">
                   {logLines.map((line, idx) => (
                     <div className="qcLogLine" key={idx}>
-                      <span className="qcMono">{">"}</span> <span className="qcMono">{line}</span>
+                      <span className="qcMono">{">"}</span>{" "}
+                      <span className="qcMono">{line}</span>
                     </div>
                   ))}
-                  {canContinue && (
-                    <div className="qcLogLine">
-                      <span className="qcMono">{">"}</span>{" "}
-                      <span className="qcMono qcGood">gate: cleared — continue enabled</span>
-                    </div>
-                  )}
                 </div>
               </div>
 
               <div className="qcWindow qcWindow--side">
                 <div className="qcWindowTitle">WARNING</div>
                 <div className="qcSideText">
-                  <div className="qcBig">DOPAMINE.EXE</div>
-                  <div className="qcSmall">Impulse intercept active.</div>
-                  <div className="qcSmall">Break autopilot before continuing.</div>
+                  <div className="qcBig qcBig--danger">SOLVE THIS MATH PROBLEM</div>
+                  <div className="qcSmall qcSmall--danger">
+                    OR YOU WILL BE LOCKED OUT FOR 5 MINUTES.
+                  </div>
+
+                  <div className="mathBox">
+                    <div className="mathPrompt">{problem.prompt}</div>
+
+                    <input
+                      className="mathInput"
+                      value={userAnswer}
+                      onChange={(e) => setUserAnswer(e.target.value)}
+                      placeholder="Type answer…"
+                      inputMode="numeric"
+                      autoFocus
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") submitAnswer();
+                      }}
+                    />
+
+                    {errorText && <div className="mathError">{errorText}</div>}
+
+                    <button
+                      className="qcBtn qcBtn--primary qcBtn--full"
+                      onClick={submitAnswer}
+                      disabled={secondsLeft <= 0}
+                      type="button"
+                    >
+                      Submit
+                    </button>
+
+                    <button
+                      className="qcBtn qcBtn--ghost qcBtn--full"
+                      onClick={backCountsAsFail}
+                      type="button"
+                    >
+                      Back
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="qcActions">
-              <button className="qcBtn qcBtn--ghost" onClick={cancel} type="button">
-                Back
-              </button>
-
-              <button className="qcBtn qcBtn--primary" onClick={go} disabled={!canContinue} type="button">
-                Continue to {targetLabel}
-              </button>
-            </div>
+            {/* no footer needed */}
           </div>
         </div>
       )}

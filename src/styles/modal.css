@@ -46,11 +46,12 @@
   justify-content: flex-end;
   margin-top: 14px;
 }
-/* --- Quarantine overlay (hacker vibe) --- */
+
+/* ---------- Quarantine overlay (hacker vibe) ---------- */
 .qcOverlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 10000;
   display: grid;
   place-items: center;
 }
@@ -165,13 +166,10 @@
 }
 
 .qcMono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
+    "Courier New", monospace;
   font-size: 12px;
   opacity: 0.92;
-}
-
-.qcGood {
-  color: rgba(120, 255, 180, 0.95);
 }
 
 .qcWindow--side .qcSideText {
@@ -190,13 +188,6 @@
   font-size: 12px;
   opacity: 0.85;
   margin-bottom: 6px;
-}
-
-.qcActions {
-  display: flex;
-  gap: 10px;
-  justify-content: flex-end;
-  margin-top: 14px;
 }
 
 .qcBtn {
@@ -230,4 +221,110 @@
   .qcLog {
     max-height: 200px;
   }
+}
+
+/* ---------- Math prompt UI inside the warning panel ---------- */
+.qcBig--danger {
+  color: rgba(255, 110, 110, 0.95);
+}
+
+.qcSmall--danger {
+  color: rgba(255, 170, 170, 0.95);
+}
+
+.mathBox {
+  margin-top: 12px;
+  padding: 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(0, 0, 0, 0.22);
+}
+
+.mathPrompt {
+  font-weight: 900;
+  font-size: 16px;
+  letter-spacing: 0.08em;
+  margin-bottom: 10px;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.mathInput {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.95);
+  outline: none;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+
+.mathInput:focus {
+  border-color: rgba(255, 155, 47, 0.55);
+  box-shadow: 0 0 0 4px rgba(255, 155, 47, 0.10);
+}
+
+.mathError {
+  margin: 6px 0 10px;
+  font-weight: 800;
+  font-size: 12px;
+  color: rgba(255, 170, 170, 0.95);
+}
+
+.qcBtn--full {
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ---------- Locked tile overlay (red X) + timer BELOW tile ---------- */
+.tile--app {
+  position: relative;
+}
+
+.tileWrap {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tile--locked {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.lockX {
+  position: absolute;
+  inset: 10px;
+  pointer-events: none;
+}
+
+.lockX__a,
+.lockX__b {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 50%;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(255, 60, 60, 0.95);
+  box-shadow: 0 0 22px rgba(255, 60, 60, 0.55);
+  transform-origin: center;
+}
+
+.lockX__a {
+  transform: translateY(-50%) rotate(35deg);
+}
+
+.lockX__b {
+  transform: translateY(-50%) rotate(-35deg);
+}
+
+.lockTextBelow {
+  margin-top: 8px;
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(255, 60, 60, 0.95);
+  text-shadow: 0 8px 24px rgba(0, 0, 0, 0.65);
 }
