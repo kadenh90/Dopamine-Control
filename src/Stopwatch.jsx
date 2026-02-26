@@ -1,4 +1,14 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  getAllActivities,
+  putActivity,
+  deleteActivity,
+  getTotalsForDay,
+  setTotal,
+  deleteTotalsForDay,
+  deleteTotalsForActivity,
+  seedDefaultActivities,
+} from "./idb";
 
 /** -----------------------------
  *  Defaults + Actions
@@ -39,42 +49,6 @@ function formatHMS(ms) {
 function formatMinutes(ms) {
   const mins = ms / 60000;
   return mins >= 60 ? `${(mins / 60).toFixed(1)}h` : `${Math.round(mins)}m`;
-}
-
-/** -----------------------------
- *  Totals persistence (per day)
- *  ---------------------------- */
-function loadTotals() {
-  const key = `totals:${todayKey()}`;
-  try {
-    const obj = JSON.parse(localStorage.getItem(key) || "{}");
-    return obj && typeof obj === "object" ? obj : {};
-  } catch {
-    return {};
-  }
-}
-
-function saveTotals(totals) {
-  const key = `totals:${todayKey()}`;
-  localStorage.setItem(key, JSON.stringify(totals));
-}
-
-/** -----------------------------
- *  Activities persistence
- *  ---------------------------- */
-function loadActivities() {
-  const key = "activities:v1";
-  try {
-    const arr = JSON.parse(localStorage.getItem(key) || "null");
-    return Array.isArray(arr) ? arr : DEFAULT_ACTIVITIES;
-  } catch {
-    return DEFAULT_ACTIVITIES;
-  }
-}
-
-function saveActivities(activities) {
-  const key = "activities:v1";
-  localStorage.setItem(key, JSON.stringify(activities));
 }
 
 // makes unique key from label
@@ -119,8 +93,7 @@ function ActivityTile({ emoji, label, selected, disabled, onClick }) {
  *  Main Component
  *  ---------------------------- */
 export default function Stopwatch() {
-  // activities are now stateful
-  const [activities, setActivities] = useState(() => loadActivities());
+  const [activities, setActivities] = useState(DEFAULT_ACTIVITIES);
 
   // Add modal state + inputs
   const [showAddModal, setShowAddModal] = useState(false);
@@ -139,12 +112,30 @@ export default function Stopwatch() {
   const startRef = useRef(null);
   const intervalRef = useRef(null);
 
-  const [totals, setTotals] = useState(() => loadTotals());
+  const [totals, setTotals] = useState({});
 
-  /** persist activities */
+  /** -----------------------------
+   * Load from IndexedDB on mount
+   * ---------------------------- */
   useEffect(() => {
-    saveActivities(activities);
-  }, [activities]);
+    let alive = true;
+
+    (async () => {
+      // Seed defaults only if DB is empty
+      await seedDefaultActivities(DEFAULT_ACTIVITIES);
+
+      const acts = await getAllActivities();
+      const t = await getTotalsForDay(todayKey());
+
+      if (!alive) return;
+      setActivities(acts.length ? acts : DEFAULT_ACTIVITIES);
+      setTotals(t);
+    })();
+
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   /** timer loop */
   useEffect(() => {
@@ -157,11 +148,6 @@ export default function Stopwatch() {
     return () => clearInterval(intervalRef.current);
   }, [running]);
 
-  /** persist totals */
-  useEffect(() => {
-    saveTotals(totals);
-  }, [totals]);
-
   function openAddModal() {
     setNewLabel("");
     setNewEmoji("");
@@ -172,18 +158,21 @@ export default function Stopwatch() {
     setShowAddModal(false);
   }
 
-  function addActivity() {
+  async function addActivity() {
     const label = newLabel.trim();
     const emoji = newEmoji.trim();
     if (!label || !emoji) return;
 
-    setActivities((prev) => {
-      const existingKeys = new Set(prev.map((a) => a.key));
-      const key = makeActivityKey(label, existingKeys);
-      const next = [...prev, { key, label, emoji }];
-      setSelected(key);
-      return next;
-    });
+    const existingKeys = new Set(activities.map((a) => a.key));
+    const key = makeActivityKey(label, existingKeys);
+    const activity = { key, label, emoji };
+
+    // Save in IndexedDB
+    await putActivity(activity);
+
+    // Update UI
+    setActivities((prev) => [...prev, activity]);
+    setSelected(key);
 
     closeAddModal();
   }
@@ -198,20 +187,23 @@ export default function Stopwatch() {
     setShowDeleteModal(false);
   }
 
-  function deleteActivity() {
+  async function handleDeleteActivity() {
     if (!deleteKey) return;
+    if (running) return; // keep it simple
 
-    // remove from activities list
+    // Delete from IndexedDB
+    await deleteActivity(deleteKey);
+    await deleteTotalsForActivity(deleteKey);
+
+    // Update UI
     setActivities((prev) => prev.filter((a) => a.key !== deleteKey));
 
-    // remove from today's totals
     setTotals((prev) => {
       const next = { ...prev };
       delete next[deleteKey];
       return next;
     });
 
-    // clear selection if you deleted the selected activity
     if (selected === deleteKey) setSelected(null);
 
     closeDeleteModal();
@@ -224,29 +216,35 @@ export default function Stopwatch() {
     setRunning(true);
   }
 
-  function stopAndSave() {
+  async function stopAndSave() {
     if (!running) return;
 
     setRunning(false);
     clearInterval(intervalRef.current);
 
     const finalMs = Date.now() - startRef.current;
+    const day = todayKey();
+    const activityKey = selected;
 
-    setTotals((prev) => {
-      const next = { ...prev };
-      next[selected] = (next[selected] || 0) + finalMs;
-      return next;
-    });
+    const nextTotal = (totals[activityKey] || 0) + finalMs;
+
+    // Persist to IndexedDB
+    await setTotal(day, activityKey, nextTotal);
+
+    // Update UI
+    setTotals((prev) => ({ ...prev, [activityKey]: nextTotal }));
 
     startRef.current = null;
     setElapsedMs(0);
     setSelected(null);
   }
 
-  function resetToday() {
+  async function resetToday() {
     if (running) return;
+
+    const day = todayKey();
+    await deleteTotalsForDay(day);
     setTotals({});
-    saveTotals({});
   }
 
   const maxMs = useMemo(() => {
@@ -353,7 +351,7 @@ export default function Stopwatch() {
               <button
                 type="button"
                 className="btn btn--danger"
-                onClick={deleteActivity}
+                onClick={handleDeleteActivity}
                 disabled={!deleteKey || activities.length === 0}
               >
                 Delete
@@ -364,7 +362,9 @@ export default function Stopwatch() {
       )}
 
       <div className="card">
-        <div className="card__meta">{running ? "Running" : selected ? "Ready" : "Select an activity to start"}</div>
+        <div className="card__meta">
+          {running ? "Running" : selected ? "Ready" : "Select an activity to start"}
+        </div>
 
         <div className="timerText">{formatHMS(elapsedMs)}</div>
 

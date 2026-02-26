@@ -46,3 +46,188 @@
   justify-content: flex-end;
   margin-top: 14px;
 }
+/* --- Quarantine overlay (hacker vibe) --- */
+.qcOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+}
+
+.qcGlass {
+  position: absolute;
+  inset: 0;
+  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.58);
+}
+
+.qcPanel {
+  position: relative;
+  width: min(920px, calc(100vw - 32px));
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(16, 20, 28, 0.85);
+  box-shadow: 0 20px 90px rgba(0, 0, 0, 0.65);
+  padding: 16px;
+  overflow: hidden;
+}
+
+.qcHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.qcTitle {
+  font-weight: 900;
+  font-size: 13px;
+  letter-spacing: 0.14em;
+  opacity: 0.9;
+}
+
+.qcClose {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 10px;
+  padding: 6px 10px;
+  color: rgba(255, 255, 255, 0.92);
+  cursor: pointer;
+}
+
+.qcSub {
+  opacity: 0.85;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+
+.qcAccent {
+  color: #ff9b2f;
+  font-weight: 800;
+}
+
+.qcProgressWrap {
+  margin-bottom: 14px;
+}
+
+.qcProgressBar {
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.qcProgressFill {
+  height: 100%;
+  background: linear-gradient(90deg, rgba(255, 155, 47, 0.95), rgba(255, 155, 47, 0.25));
+}
+
+.qcProgressText {
+  margin-top: 8px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  opacity: 0.85;
+}
+
+.qcWindows {
+  display: grid;
+  grid-template-columns: 1.4fr 0.6fr;
+  gap: 12px;
+}
+
+.qcWindow {
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(10, 12, 18, 0.55);
+  overflow: hidden;
+}
+
+.qcWindowTitle {
+  padding: 10px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  opacity: 0.8;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.qcLog {
+  padding: 10px 12px;
+  max-height: 240px;
+  overflow: auto;
+}
+
+.qcLogLine {
+  margin-bottom: 6px;
+}
+
+.qcMono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+  opacity: 0.92;
+}
+
+.qcGood {
+  color: rgba(120, 255, 180, 0.95);
+}
+
+.qcWindow--side .qcSideText {
+  padding: 12px;
+}
+
+.qcBig {
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  font-size: 16px;
+  color: rgba(255, 155, 47, 0.95);
+  margin-bottom: 6px;
+}
+
+.qcSmall {
+  font-size: 12px;
+  opacity: 0.85;
+  margin-bottom: 6px;
+}
+
+.qcActions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+.qcBtn {
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 800;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.qcBtn--ghost:hover {
+  background: rgba(255, 255, 255, 0.10);
+}
+
+.qcBtn--primary {
+  border-color: rgba(255, 155, 47, 0.45);
+  background: rgba(255, 155, 47, 0.14);
+}
+
+.qcBtn--primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .qcWindows {
+    grid-template-columns: 1fr;
+  }
+  .qcLog {
+    max-height: 200px;
+  }
+}
