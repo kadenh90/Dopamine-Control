@@ -1,4 +1,4 @@
-/* ---------- Modal (overlay + centered card) ---------- */
+/*  Modal */
 .modalOverlay {
   position: fixed;
   inset: 0;
@@ -47,7 +47,7 @@
   margin-top: 14px;
 }
 
-/* ---------- Quarantine overlay (hacker vibe) ---------- */
+/*  Quarantine overlay  */
 .qcOverlay {
   position: fixed;
   inset: 0;
@@ -223,7 +223,7 @@
   }
 }
 
-/* ---------- Math prompt UI inside the warning panel ---------- */
+/*  Math prompt UI inside the warning panel  */
 .qcBig--danger {
   color: rgba(255, 110, 110, 0.95);
 }
@@ -277,7 +277,7 @@
   margin-top: 8px;
 }
 
-/* ---------- Locked tile overlay (red X) + timer BELOW tile ---------- */
+/*  Locked tile overlay */
 .tile--app {
   position: relative;
 }

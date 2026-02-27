@@ -121,7 +121,7 @@ export default function Stopwatch() {
     let alive = true;
 
     (async () => {
-      // Seed defaults only if DB is empty
+
       await seedDefaultActivities(DEFAULT_ACTIVITIES);
 
       const acts = await getAllActivities();
@@ -167,10 +167,10 @@ export default function Stopwatch() {
     const key = makeActivityKey(label, existingKeys);
     const activity = { key, label, emoji };
 
-    // Save in IndexedDB
+
     await putActivity(activity);
 
-    // Update UI
+
     setActivities((prev) => [...prev, activity]);
     setSelected(key);
 
@@ -189,13 +189,13 @@ export default function Stopwatch() {
 
   async function handleDeleteActivity() {
     if (!deleteKey) return;
-    if (running) return; // keep it simple
+    if (running) return;
 
     // Delete from IndexedDB
     await deleteActivity(deleteKey);
     await deleteTotalsForActivity(deleteKey);
 
-    // Update UI
+
     setActivities((prev) => prev.filter((a) => a.key !== deleteKey));
 
     setTotals((prev) => {
@@ -228,7 +228,7 @@ export default function Stopwatch() {
 
     const nextTotal = (totals[activityKey] || 0) + finalMs;
 
-    // Persist to IndexedDB
+
     await setTotal(day, activityKey, nextTotal);
 
     // Update UI

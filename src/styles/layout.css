@@ -1,4 +1,4 @@
-/* ---------- Page container ---------- */
+/* Page container*/
 .page {
   padding: 22px 16px;
   max-width: 900px;
@@ -16,7 +16,7 @@
   color: var(--muted);
 }
 
-/* ---------- Section + grids ---------- */
+/*  Section + grids */
 .section { margin-top: 22px; }
 .section__title { margin: 0 0 10px; }
 

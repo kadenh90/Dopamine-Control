@@ -1,4 +1,4 @@
-/* ---------- Buttons ---------- */
+/*  Buttons -*/
 .btn {
   padding: 10px 14px;
   border-radius: 14px;
@@ -35,7 +35,7 @@
   border-color: rgba(255, 80, 80, 0.22);
 }
 
-/* ---------- Tiles (icons) ---------- */
+/*  Tiles (icons)  */
 .tile {
   width: 92px;
   height: 92px;
@@ -98,7 +98,7 @@
   box-shadow: 0 18px 34px rgba(255, 136, 0, 0.22);
 }
 
-/* ---------- Cards + timer ---------- */
+/*  Cards + timer  */
 .card {
   margin-top: 18px;
   padding: 18px;
@@ -121,7 +121,7 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ---------- Summary bars ---------- */
+/*  Summary bars  */
 .summaryCard {
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 16px;

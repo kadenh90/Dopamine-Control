@@ -55,7 +55,6 @@ function setLockUntil(appKey, ts) {
   try {
     localStorage.setItem(lockKey(appKey), String(ts));
   } catch {
-    // ignore
   }
 }
 
@@ -75,7 +74,6 @@ function randomInt(min, max) {
 }
 
 function makeMathProblem() {
-  // Two-digit multiply like 17*19
   const a = randomInt(12, 29);
   const b = randomInt(12, 29);
   return {
@@ -104,7 +102,6 @@ function buildPressureLogs(secondsLeft) {
 }
 
 export default function App() {
-  // Overlay open state + target
   const [open, setOpen] = useState(false);
   const [targetUrl, setTargetUrl] = useState("");
   const [targetLabel, setTargetLabel] = useState("");
@@ -177,7 +174,7 @@ export default function App() {
     closeOverlay();
   }
 
-  // NEW: Back/close counts as failing (prevents cheating)
+ 
   function backCountsAsFail() {
     if (!open || !targetKey) {
       closeOverlay();
@@ -200,7 +197,7 @@ export default function App() {
       return;
     }
 
-    // unlimited attempts; only time-out causes lockout
+    // unlimited attempts, only time-out causes lockout
     setErrorText("Wrong. Try again.");
     setUserAnswer("");
   }
@@ -239,7 +236,6 @@ export default function App() {
       if (timerRef.current) clearInterval(timerRef.current);
       timerRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const pct = clamp(((60 - secondsLeft) / 60) * 100, 0, 100);

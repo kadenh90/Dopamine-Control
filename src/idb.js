@@ -2,8 +2,8 @@ const DB_NAME = "discipline_app";
 const DB_VERSION = 1;
 
 const STORES = {
-  activities: "activities", // keyPath: "key"
-  totals: "totals", // keyPath: "id" (day|activityKey)
+  activities: "activities", 
+  totals: "totals", 
 };
 
 function openDB() {
@@ -37,7 +37,7 @@ function txDone(tx) {
   });
 }
 
-/** -------- Activities -------- */
+/**  Activities*/
 export async function getAllActivities() {
   const db = await openDB();
   const tx = db.transaction(STORES.activities, "readonly");
@@ -69,9 +69,7 @@ export async function deleteActivity(key) {
   db.close();
 }
 
-/** -------- Totals (per day) --------
- * record: { id: "YYYY-MM-DD|work", day: "YYYY-MM-DD", activityKey:"work", ms: 123 }
- */
+/* Totals (per day)*/
 export async function getTotalsForDay(day) {
   const db = await openDB();
   const tx = db.transaction(STORES.totals, "readonly");
@@ -135,13 +133,12 @@ export async function deleteTotalsForActivity(activityKey) {
   db.close();
 }
 
-/** Optional: seed defaults once */
+/** seed defaults once */
 export async function seedDefaultActivities(defaultActivities) {
   const existing = await getAllActivities();
   if (existing.length > 0) return;
 
   for (const a of defaultActivities) {
-    // eslint-disable-next-line no-await-in-loop
     await putActivity(a);
   }
 }
